@@ -33,20 +33,10 @@ userSchema
   .virtual('friendCount')
   // Getter
   .get(function () {
-    return `${this.friends.length}`;
+    return this.friends.length;
   })
 
 // user model
 const User = model('user', userSchema);
-
-const handleError = (err) => console.error(err);
-
-User
-  .create({
-    username: 'lernantino',
-    email: 'lernantino@gmail.com',
-  })
-  .then(result => console.log('New user created.', result))
-  .catch(err => handleError(err));
 
 module.exports = User;

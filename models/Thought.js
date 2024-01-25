@@ -2,12 +2,10 @@ const { Schema, model } = require('mongoose');
 
 // schema for Reaction
 const reactionSchema = new Schema({
-  reactionId: [
-    { 
+  reactionId:{ 
     type: Schema.Types.ObjectId,
     default: () => new Schema.Types.ObjectId(), 
-    }
-  ],
+    },
   reactionBody: {
     type: String, 
     required: true, 
@@ -20,16 +18,23 @@ const reactionSchema = new Schema({
   createdAt: { 
     type: Date, 
     default: Date.now
-    ////// Use a getter method to format the timestamp on query //////
   },
-});
+},
+{
+  toJSON: {
+      virtuals: true,
+      getters: true,
+  },
+  id: false,
+}
+);
 
 // gets length of thought's reactions array
 reactionSchema
   .virtual('reactionCount')
   // Getter
   .get(function () {
-    return `${this.thought.length}`;
+    return `${this.reactions.length} ${this.createdAt.toLocaleString()}`;
   })
 
 // schema for thought
@@ -49,7 +54,15 @@ const thoughtSchema = new Schema({
     required: true, 
   },
   reactions: [reactionSchema],
-});
+},
+{
+  toJSON: {
+      virtuals: true,
+      getters: true,
+  },
+  id: false,
+}
+);
 
 // thought model
 const Thought = model('thought', thoughtSchema);
