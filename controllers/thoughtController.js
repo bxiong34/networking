@@ -5,9 +5,11 @@ module.exports = {
   async getThoughts(req, res) {
     try {
       const thoughts = await Thought.find();
+      console.log(thoughts); // Log fetched thoughts
       res.json(thoughts);
     } catch (err) {
-      res.status(500).json(err);
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
   },
   // get a single thought by _id
@@ -79,26 +81,25 @@ module.exports = {
       res.status(500).json(err);
     }
   },
-  // create a reaction 
-  async createReaction(req, res) {
+  // add a reaction 
+  async addReaction(req, res) {
     try {
-      const { reactionBody, username } = req.body;
-      const { thoughtId } = req.params;
+      const { thoughtId, reactionId  } = req.params;
 
       const updatedThought = await Thought.findOneAndUpdate(
         { _id: thoughtId },
-        { $push: { reactions: { reactionBody, username } } },
+        { $addToSet: { reactions: reactionId } },
         { new: true }
       );
 
       if (!updatedThought) {
-        return res.status(404).json({ message: 'No thought with that ID found.' });
+        return res.status(404).json({ error: 'No thought with that ID found.' });
       }
 
       res.json(updatedThought);
     } catch (err) {
       console.error(err);
-      res.status(500).json(err);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
   },
   // delete a reaction by reactionId
@@ -108,7 +109,7 @@ module.exports = {
 
       const updatedThought = await Thought.findOneAndUpdate(
         { _id: thoughtId },
-        { $pull: { reactions: { _id: reactionId } } },
+        { $pull: { reactions: reactionId } },
         { new: true }
       );
 

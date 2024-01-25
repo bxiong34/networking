@@ -1,10 +1,10 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model, mongoose } = require('mongoose');
 
 // schema for Reaction
 const reactionSchema = new Schema({
   reactionId:{ 
-    type: Schema.Types.ObjectId,
-    default: () => new Schema.Types.ObjectId(), 
+    type: mongoose.Types.ObjectId,
+    required: true, 
     },
   reactionBody: {
     type: String, 
@@ -17,7 +17,17 @@ const reactionSchema = new Schema({
   },
   createdAt: { 
     type: Date, 
-    default: Date.now
+    default: Date.now,
+    get: function() {
+      return new Date(this._doc.createdAt).toLocaleString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+      });
+    },
   },
 },
 {
@@ -34,8 +44,8 @@ reactionSchema
   .virtual('reactionCount')
   // Getter
   .get(function () {
-    return `${this.reactions.length} ${this.createdAt.toLocaleString()}`;
-  })
+    return this.reactions ? this.reactions.length : 0;
+  });
 
 // schema for thought
 const thoughtSchema = new Schema({
@@ -47,13 +57,26 @@ const thoughtSchema = new Schema({
   },
   createdAt: { 
     type: Date, 
-    default: Date.now
+    default: Date.now,
+    get: function() {
+      return new Date(this._doc.createdAt).toLocaleString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+      });
+    },
   },
   username: {
     type: String, 
     required: true, 
   },
-  reactions: [reactionSchema],
+  reactions: {
+    type: [reactionSchema],
+    default: [],
+  },
 },
 {
   toJSON: {

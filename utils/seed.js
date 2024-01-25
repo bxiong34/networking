@@ -1,39 +1,46 @@
 const connection = require('../config/connection');
 const { User, Thought } = require('../models');
-const { getRandomUser, getRandomThoughts, getRandomReactions } = require('./data');
+const { users, thoughts, reactions } = require('./data');
 
-connection.on('error', (err) => err);
+connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1);
+});
 
 connection.once('open', async () => {
-  // delete from collections if they exist
-  let thoughtCheck = await connection.db.listCollections({ name: 'thoughts' }).toArray();
-  if (thoughtCheck.length) {
-    await connection.dropCollection('thoughts');
-  }
+  try {
+    // delete from collections if they exist
+    await Promise.all([Thought.deleteMany(), User.deleteMany()]);
 
-  const thoughts = [...getRandomThoughts(10)];
-  const reactions = [];
-  const users = [];
+    // insert users
+    const insertedUsers = await User.insertMany(users);
 
-  // makes thoughts array
-  const makeThought = (thoughtText) => {
-    thoughts.push({
-      thoughtText,
-      username: getRandomUser().split(' ')[0],
-      reactions: [reactions[genRandomIndex(reactions)]._id],
+    // map usernames to their corresponding _id values
+    const usernameToId = {};
+    insertedUsers.forEach((user) => {
+      usernameToId[user.username] = user._id;
     });
-  };
 
-  await Thought.collection.insertMany(reactions);
+    // update thought and reaction with correct user references
+    const thoughtsWithUserIds = thoughts.map((thought) => ({
+      ...thought,
+      username: usernameToId[thought.username],
+    }));
 
-  reactions.forEach(() => makeThought(getRandomThoughts(30)));
+    const reactionsWithUserIds = reactions.map((reaction) => ({
+      ...reaction,
+      username: usernameToId[reaction.username],
+    }));
+    
+    // insert thoughts and reactions
+    await Thought.insertMany(thoughtsWithUserIds);
+    await Thought.updateMany({}, { $push: { reactions: { $each: reactionsWithUserIds } } });
 
-  await Thought.collection.insertMany(thoughts);
-
-  await User.collection.insertMany(users);
-
-  console.table(thoughts);
-  console.table(reactions);
-  console.timeEnd('seeding complete 🌱');
-  process.exit(0);
+    console.log('Seeding complete 🌱');
+  } catch (error) {
+    console.error('Error during seeding:', error);
+  } finally {
+    // close the MongoDB connection after seeding
+    await connection.close();
+  }
 });

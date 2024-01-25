@@ -2,7 +2,7 @@
 
 ## Description
 
-An API is built for users to network with others by sharing their thoughts, adding friends, and reacting to their friends thoughts. Since the application is not deployed, the application will be used throught localhost. 
+An API is built for users to network with others by sharing their thoughts, adding friends, and reacting to their friends' thoughts. Since the application is not deployed, the application will be used throught localhost. 
 
 
 ## User Story
@@ -31,7 +31,7 @@ THEN I am able to successfully create and delete reactions to thoughts and add a
 
 The video below demonstrate the application's API routes (GET, POST, PUT, and DELETE) being tested via Insomnia:
 
-[![Demo of routes being tested in Insomnia.](<./assets/Screenshot 2024-01-24 at 10.14.18 PM.png>)](https://drive.google.com/file/d/1-pBa3DXgo5PKbLf48WkoIGv7rzqh_2Lt/view?usp=sharing)
+[![Demo of routes being tested in Insomnia.](<./assets/Screenshot 2024-01-24 at 10.14.18 PM.png>)](https://drive.google.com/file/d/1TIgkzrKqm_FkkaXPFPy4DK0JY3SZ4CyU/view?usp=sharing)
 
 ## Installation
 
